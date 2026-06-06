@@ -346,7 +346,7 @@ export default function BibleBrowserApp() {
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <header className="bb-header">
         <span className="bb-logo">
-          <img src="/icon.png" alt="logo" className="bb-logo-img" /> Screen Scripture
+          <img src="/icon.png" alt="logo" className="bb-logo-img" /> Scripture Screen
         </span>
 
         {/* Mobile: search bar in header */}
