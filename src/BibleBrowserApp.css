@@ -62,14 +62,28 @@ html.light, .light {
   --bb-verse-num:   #003399;
 }
 
+/* ── Universal Reset ──────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html, body, #bible-browser-root {
+  width: 100%;
+  max-width: 100%;
   height: 100%;
+  margin: 0;
+  padding: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   background: var(--bb-bg);
   color: var(--bb-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
+  overflow-x: hidden;
+  touch-action: manipulation;
+}
+
+button, input, select, textarea {
+  touch-action: manipulation;
 }
 
 .lang-ta, .lang-ta input, .lang-ta button, .lang-ta .bb-verse-text {
@@ -278,12 +292,13 @@ html, body, #bible-browser-root {
   min-width: 0;
 }
 
-/* ── Header ──────────────────────────────────────────────────────────────── */
+/* ── Header (Row 1) ──────────────────────────────────────────────────────── */
 .bb-header {
   height: var(--bb-header-h);
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 10px;
   padding: 0 14px;
   padding-top: var(--safe-top);
   background: var(--bb-surface);
@@ -296,81 +311,478 @@ html, body, #bible-browser-root {
 .bb-logo {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
+  gap: 8px;
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
   color: var(--bb-text);
   white-space: nowrap;
   user-select: none;
+  flex-shrink: 0;
 }
 .bb-logo-img {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
+}
+.bb-logo-text {
+  font-weight: 700;
 }
 
 .bb-header-nav {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
-/* ── Nav Bar (book + chapter + arrows) ───────────────────────────────────── */
+.bb-user-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bb-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bb-surface-2);
+  border: 1px solid var(--bb-border);
+  border-radius: 20px;
+  padding: 3px 8px 3px 4px;
+  max-width: 140px;
+  user-select: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.bb-user-pill:hover {
+  border-color: var(--bb-accent);
+  background: var(--bb-accent-dim);
+}
+.bb-user-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--bb-accent);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.bb-user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--bb-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bb-logout-confirm {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.bb-signin-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bb-surface-2);
+  border: 1px solid var(--bb-border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--bb-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.bb-signin-btn:hover {
+  border-color: var(--bb-accent);
+  color: var(--bb-accent);
+}
+
+/* ── User Profile Modal Styles ────────────────────────────────────────────── */
+.bb-profile-modal {
+  max-width: 360px;
+}
+.bb-profile-body {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.bb-profile-avatar-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bb-profile-avatar-ring {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, var(--bb-accent), #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bb-profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--bb-surface-3);
+  color: var(--bb-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.bb-profile-avatar-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--bb-accent);
+  color: #000;
+  font-size: 12px;
+  font-weight: 800;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bb-surface);
+}
+.bb-profile-status-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid var(--bb-surface);
+}
+.bb-profile-info-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bb-surface-2);
+  border: 1px solid var(--bb-border);
+  border-radius: 10px;
+  padding: 14px;
+}
+.bb-profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.bb-profile-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--bb-text-3);
+}
+.bb-profile-val {
+  font-size: 13px;
+  color: var(--bb-text);
+  word-break: break-all;
+}
+.bb-profile-val.font-bold {
+  font-weight: 700;
+  color: var(--bb-accent);
+}
+.bb-profile-id-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bb-profile-id-code {
+  flex: 1;
+  font-family: monospace;
+  font-size: 12px;
+  background: var(--bb-surface-3);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--bb-border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bb-profile-copy-btn {
+  background: var(--bb-surface-3);
+  border: 1px solid var(--bb-border);
+  border-radius: 6px;
+  color: var(--bb-text-2);
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.bb-profile-copy-btn:hover {
+  border-color: var(--bb-accent);
+  color: var(--bb-accent);
+}
+.bb-profile-actions {
+  width: 100%;
+}
+.bb-profile-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 9px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bb-profile-logout-btn:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* ── Profile Confirm Box ─────────────────────────────────────────────────── */
+.bb-profile-confirm-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: var(--bb-surface-2);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
+  padding: 12px;
+}
+.bb-profile-confirm-text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--bb-text);
+  font-weight: 600;
+  text-align: center;
+}
+.bb-profile-confirm-btn-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.bb-profile-confirm-yes {
+  flex: 1;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  transition: opacity 0.15s;
+}
+.bb-profile-confirm-yes:hover {
+  opacity: 0.9;
+}
+.bb-profile-confirm-cancel {
+  flex: 1;
+  background: var(--bb-surface-3);
+  color: var(--bb-text);
+  border: 1px solid var(--bb-border);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.bb-profile-confirm-cancel:hover {
+  background: var(--bb-surface);
+}
+
+/* ── Center Sign-out Confirmation Modal ───────────────────────────────────── */
+.bb-confirm-modal {
+  max-width: 340px;
+}
+.bb-confirm-modal-body {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+.bb-confirm-modal-text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--bb-text);
+}
+.bb-confirm-modal-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+.bb-confirm-modal-yes {
+  flex: 1;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  transition: opacity 0.15s;
+}
+.bb-confirm-modal-yes:hover {
+  opacity: 0.9;
+}
+.bb-confirm-modal-cancel {
+  flex: 1;
+  background: var(--bb-surface-3);
+  color: var(--bb-text);
+  border: 1px solid var(--bb-border);
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.bb-confirm-modal-cancel:hover {
+  background: var(--bb-surface-2);
+}
+
+/* ── Mobile Controls Container (Row 2 & Row 3) ───────────────────────────── */
+.bb-mobile-controls-wrap {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  background: var(--bb-surface);
+  border-bottom: 1px solid var(--bb-border);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* ── Mobile Row 2: Search Bar & Language/Version Selector ─────────────────── */
+.bb-mobile-search-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--bb-border);
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.bb-mobile-search-cell {
+  flex: 1;
+  min-width: 0;
+}
+.bb-mobile-search-cell .bb-search-input {
+  height: 34px;
+  padding: 6px 52px 6px 10px;
+  border-radius: 8px;
+  font-size: 16px !important;
+}
+.bb-mobile-search-cell .bb-search-actions {
+  right: 4px;
+  gap: 2px;
+}
+.bb-mobile-search-cell .bb-search-clear,
+.bb-mobile-search-cell .bb-search-submit {
+  padding: 4px;
+}
+.bb-mobile-version-cell {
+  flex-shrink: 0;
+  width: 106px;
+}
+.bb-mobile-version-cell .bb-version-select-wrap {
+  width: 106px;
+  max-width: 106px;
+}
+.bb-mobile-version-cell .bb-version-select {
+  height: 34px;
+  padding: 4px 24px 4px 10px;
+  border-radius: 8px;
+  font-size: 16px !important;
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+.bb-mobile-version-cell .bb-version-select-icon {
+  right: 7px;
+}
+
+/* ── Nav Bar (Row 3: Book + Chapter & Prev/Next buttons) ──────────────────── */
 .bb-nav {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 6px 8px;
   background: var(--bb-surface);
-  border-bottom: 1px solid var(--bb-border);
   flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .bb-nav-book-btn {
   flex: 1;
   min-width: 0;
+  height: 34px;
   display: flex;
   align-items: center;
   gap: 6px;
   background: var(--bb-surface-2);
   border: 1px solid var(--bb-border);
   border-radius: 8px;
-  padding: 7px 12px;
+  padding: 0 8px;
   cursor: pointer;
   color: var(--bb-text);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   font-family: inherit;
   transition: border-color 0.2s, background 0.2s;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .bb-nav-book-btn:hover { border-color: var(--bb-border-acc); background: var(--bb-surface-3); }
-
-.bb-nav-ch-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--bb-surface-2);
-  border: 1px solid var(--bb-border);
-  border-radius: 8px;
-  padding: 7px 12px;
-  cursor: pointer;
-  color: var(--bb-text);
-  font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
+.bb-nav-book-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  transition: border-color 0.2s, background 0.2s;
+  text-align: left;
 }
-.bb-nav-ch-btn:hover { border-color: var(--bb-border-acc); background: var(--bb-surface-3); }
+
+.bb-nav-arrows {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
 
 .bb-nav-arrow {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -378,8 +790,10 @@ html, body, #bible-browser-root {
   border: 1px solid var(--bb-border);
   border-radius: 8px;
   cursor: pointer;
-  color: var(--bb-text-2);
+  color: var(--bb-text);
   font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
   flex-shrink: 0;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
   user-select: none;
@@ -395,12 +809,12 @@ html, body, #bible-browser-root {
   align-items: center;
 }
 .bb-version-select-wrap.mobile {
-  max-width: 140px; /* Reduced width for mobile header */
+  max-width: 140px;
 }
 .bb-version-select-wrap.mobile .bb-version-select {
-  padding: 4px 28px 4px 10px;
-  font-size: 12px;
-  height: 28px;
+  padding: 4px 20px 4px 8px;
+  font-size: 13px;
+  height: 34px;
 }
 .bb-version-select {
   width: 100%;
@@ -418,6 +832,7 @@ html, body, #bible-browser-root {
   transition: all 0.2s ease;
   white-space: nowrap;
   text-overflow: ellipsis;
+  user-select: none;
 }
 .bb-version-select:hover, .bb-version-select:focus {
   border-color: var(--bb-accent);
@@ -566,54 +981,67 @@ html, body, #bible-browser-root {
 .bb-verse-scroll {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden !important;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   scrollbar-width: auto;
   scrollbar-color: var(--bb-accent) var(--bb-surface-2);
-  padding-bottom: calc(24px + var(--safe-bottom));
+  padding-bottom: calc(16px + var(--safe-bottom));
+  width: 100%;
+  box-sizing: border-box;
 }
 .bb-verse-scroll::-webkit-scrollbar { width: 10px; }
 .bb-verse-scroll::-webkit-scrollbar-track { background: var(--bb-surface-2); }
 .bb-verse-scroll::-webkit-scrollbar-thumb { background: var(--bb-accent); border-radius: 5px; }
 
 .bb-chapter-title {
-  padding: 20px 20px 10px;
+  padding: 16px 16px 8px;
   font-size: 13px;
   font-weight: 700;
   color: var(--bb-text-3);
   text-transform: uppercase;
   letter-spacing: 0.7px;
   user-select: none;
+  width: 100%;
+  max-width: 860px;
+  box-sizing: border-box;
 }
 
 .bb-verse-list {
-  padding: 0 20px 20px;
+  padding: 0 12px 16px;
   display: flex;
   flex-direction: column;
   gap: 0;
+  width: 100%;
+  max-width: 860px;
+  box-sizing: border-box;
 }
 
 .bb-verse-item {
   display: flex;
-  gap: 12px;
-  padding: 10px 0;
+  gap: 10px;
+  padding: 7px 0;
   border-bottom: 1px solid rgba(255,255,255,0.04);
   align-items: flex-start;
   transition: background 0.15s;
   border-radius: 4px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .bb-verse-item:last-child { border-bottom: none; }
 .bb-verse-item.highlighted {
   background: var(--bb-accent-dim);
-  border-radius: 8px;
-  padding: 10px 10px;
-  margin: 0 -10px;
+  border-radius: 6px;
+  padding: 7px 8px;
+  margin: 0;
   border-bottom: none;
   box-shadow: 0 0 0 1px var(--bb-border-acc);
 }
 
 .bb-verse-num {
-  min-width: 28px;
+  min-width: 24px;
   font-size: 12px;
   font-weight: 700;
   color: var(--bb-verse-num);
@@ -806,6 +1234,13 @@ html, body, #bible-browser-root {
   .bb-sidebar { display: none; }
   .bb-mobile-only { display: flex; }
   .bb-desktop-only { display: none; }
+
+  /* Prevent browser auto-zoom on mobile when focusing inputs/dropdowns */
+  input, select, textarea,
+  .bb-search-input,
+  .bb-version-select {
+    font-size: 16px !important;
+  }
 }
 @media (min-width: 768px) {
   .bb-mobile-only { display: none; }
@@ -816,12 +1251,13 @@ html, body, #bible-browser-root {
 /* ── Tablet / desktop verse sizing tweaks ──────────────────────────────── */
 @media (min-width: 768px) {
   .bb-verse-text { font-size: 18px; }
-  .bb-verse-list { padding: 0 28px 28px; }
-  .bb-chapter-title { padding: 24px 28px 12px; }
+  .bb-verse-list { padding: 0 24px 20px; width: 100%; max-width: 860px; }
+  .bb-chapter-title { padding: 18px 24px 10px; max-width: 860px; }
 }
 @media (min-width: 1200px) {
-  .bb-verse-text { font-size: 19px; line-height: 1.8; }
-  .bb-verse-list { max-width: 800px; }
+  .bb-verse-text { font-size: 18px; line-height: 1.75; }
+  .bb-verse-list { max-width: 880px; }
+  .bb-chapter-title { max-width: 880px; }
 }
 
 /* ── Toast ───────────────────────────────────────────────────────────────── */

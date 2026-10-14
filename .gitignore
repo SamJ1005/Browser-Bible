@@ -8,6 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+public/bible/
 dist
 dist-ssr
 *.local
@@ -29,3 +30,5 @@ dist-ssr
 *.svg
 *.ttf
 *.txt
+
+.vercel

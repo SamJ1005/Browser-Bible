@@ -7,11 +7,17 @@ export default function SearchBar({ onSearch, placeholder = 'Search… e.g. John
   const handleSubmit = (e) => {
     e.preventDefault();
     const q = query.trim();
-    if (q) onSearch(q);
+    if (q) {
+      onSearch(q);
+      inputRef.current?.blur();
+    }
   };
 
   const handleKey = (e) => {
-    if (e.key === 'Enter') handleSubmit(e);
+    if (e.key === 'Enter') {
+      handleSubmit(e);
+      inputRef.current?.blur();
+    }
   };
 
   const clear = () => {

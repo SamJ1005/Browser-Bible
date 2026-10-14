@@ -1,11 +1,11 @@
 // Bible version definitions — all files served from public/bible/
 export const BIBLE_VERSIONS = [
   {
-    id: 'tamil-bsi',
-    label: 'Tamil BSI',
+    id: 'tamil',
+    label: 'Tamil',
     shortLabel: 'Tamil',
     lang: 'ta',
-    file: './bible/tamil_bsi.xml',
+    file: './bible/tamil.xml',
     format: 'xml-zefania',
   },
   {
@@ -21,10 +21,11 @@ export const BIBLE_VERSIONS = [
     label: 'English NKJV',
     shortLabel: 'NKJV',
     lang: 'en',
-    file: './bible/nkjv.json',
-    format: 'json-nkjv',
+    file: './bible/nkjv.xml',
+    format: 'xml-nkjv',
   },
 ];
 
 export const getVersionById = (id) =>
-  BIBLE_VERSIONS.find((v) => v.id === id) || BIBLE_VERSIONS[0];
+  BIBLE_VERSIONS.find((v) => v.id === id || (id === 'tamil-bsi' && v.id === 'tamil')) || BIBLE_VERSIONS[0];
+

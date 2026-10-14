@@ -40,8 +40,15 @@ async function loadBibleVersion(version) {
       const xmlDoc = parser.parseFromString(text, 'text/xml');
       // Check for parser errors
       const parserErr = xmlDoc.querySelector('parsererror');
-      if (parserErr) throw new Error('XML parse error in Tamil BSI');
+      if (parserErr) throw new Error(`XML parse error in ${version.label}`);
       data = { type: 'xml-zefania', xmlDoc };
+    } else if (version.format === 'xml-nkjv') {
+      const text = await res.text();
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(text, 'text/xml');
+      const parserErr = xmlDoc.querySelector('parsererror');
+      if (parserErr) throw new Error(`XML parse error in ${version.label}`);
+      data = { type: 'xml-nkjv', xmlDoc };
     } else if (version.format === 'json-nkjv') {
       const raw = await res.json();
       data = normalizeNKJV(raw);
@@ -89,6 +96,41 @@ function parseXmlZefaniaChapter(xmlDoc, bookName, chapterNum) {
     .filter((v) => v.text);
 }
 
+function parseXmlNkjvChapter(xmlDoc, bookName, chapterNum) {
+  const bookIdx = bibleBooks.findIndex(
+    (b) => b.english.toLowerCase() === bookName.toLowerCase()
+  );
+  if (bookIdx === -1) return [];
+
+  // Book id is 0-indexed in nkjv.xml (0 to 65)
+  const bookNode =
+    xmlDoc.querySelector(`Book[id="${bookIdx}"]`) ||
+    xmlDoc.querySelector(`book[id="${bookIdx}"]`);
+  if (!bookNode) return [];
+
+  const chNode =
+    bookNode.querySelector(`Chapter[id="${chapterNum}"]`) ||
+    bookNode.querySelector(`chapter[id="${chapterNum}"]`);
+  if (!chNode) return [];
+
+  const nodes = chNode.querySelectorAll('Verse, verse');
+  return Array.from(nodes)
+    .map((v, i) => {
+      const verseAttr = v.getAttribute('id');
+      const verseNum = verseAttr ? parseInt(verseAttr, 10) : i + 1;
+      let text = v.textContent.trim();
+      // Remove enclosing quotes from nkjv.xml if present
+      if (text.startsWith('"') && text.endsWith('"') && text.length >= 2) {
+        text = text.slice(1, -1).trim();
+      }
+      return {
+        verse: verseNum,
+        text,
+      };
+    })
+    .filter((v) => v.text);
+}
+
 function parseJsonBooksChapter(data, bookName, chapterNum) {
   if (!data.books) return [];
   const book = data.books.find(
@@ -114,13 +156,11 @@ export function useBibleBrowser(version) {
   useEffect(() => {
     if (!version) return;
     if (dataCache[version.id]) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setData(dataCache[version.id]);
       setLoading(false);
       return;
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError('');
     loadBibleVersion(version)
@@ -140,6 +180,9 @@ export function useBibleBrowser(version) {
       if (!data) return [];
       if (data.type === 'xml-zefania') {
         return parseXmlZefaniaChapter(data.xmlDoc, bookName, chapterNum);
+      }
+      if (data.type === 'xml-nkjv') {
+        return parseXmlNkjvChapter(data.xmlDoc, bookName, chapterNum);
       }
       if (data.type === 'json-books') {
         return parseJsonBooksChapter(data, bookName, chapterNum);

@@ -1,0 +1,6 @@
+# Files ignored by Vercel CLI during upload
+.git
+node_modules
+dist
+.env*.local
+.vscode

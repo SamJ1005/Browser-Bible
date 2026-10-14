@@ -12,7 +12,7 @@ export default function VersionSelector({ versionId, onSelect, isMobile }) {
       >
         {BIBLE_VERSIONS.map((v) => (
           <option key={v.id} value={v.id}>
-            {v.label}
+            {isMobile ? (v.shortLabel || v.label) : v.label}
           </option>
         ))}
       </select>

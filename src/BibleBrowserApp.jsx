@@ -12,6 +12,7 @@ import NavBar from './components/NavBar';
 import BookDrawer from './components/BookDrawer';
 import VerseDisplay from './components/VerseDisplay';
 import AuthModal from './components/AuthModal';
+import UserProfileModal from './components/UserProfileModal';
 import { useAuth } from './context/AuthContext';
 
 // ─── Persistence helpers ──────────────────────────────────────────────────────
@@ -172,13 +173,17 @@ export default function BibleBrowserApp() {
   const isMobile = useIsMobile();
   const { theme, toggleTheme } = useTheme();
 
-  const [versionId, setVersionId] = useState(saved.versionId || 'tamil-bsi');
+  const [versionId, setVersionId] = useState(() => {
+    if (saved.versionId === 'tamil-bsi') return 'tamil';
+    return saved.versionId || 'tamil';
+  });
   const [book, setBook]         = useState(saved.book || 'John');
   const [chapter, setChapter]   = useState(saved.chapter || 1);
   const [highlightVerse, setHighlightVerse] = useState(null);
   const [toastMsg, setToastMsg] = useState('');
   
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
   const { user, logout } = useAuth();
 
@@ -343,62 +348,15 @@ export default function BibleBrowserApp() {
 
   return (
     <div className={`bb-app ${theme} ${isTamil ? 'lang-ta' : 'lang-en'}`}>
-      {/* ── Header ────────────────────────────────────────────────────────── */}
+      {/* ── Header (Row 1: Logo, App Name, Theme, User ID) ────────────────── */}
       <header className="bb-header">
         <span className="bb-logo">
-          <img src="/icon.png" alt="logo" className="bb-logo-img" /> Scripture Screen
+          <img src="/icon.png" alt="logo" className="bb-logo-img" />
+          <span className="bb-logo-text">Scripture Screen</span>
         </span>
 
-        {/* Mobile: search bar in header */}
-        <div className="bb-mobile-only" style={{ flex: 1, padding: '0 8px' }}>
-          <SearchBar onSearch={handleSearch} placeholder="Search verse" />
-        </div>
-
         <div className="bb-header-nav">
-          {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--bb-accent)', marginRight: '4px' }}>
-                {user.displayName}
-              </span>
-              {logoutConfirm ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '4px' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--bb-text-2)' }}>Log out?</span>
-                  <button 
-                    style={{ background: '#ff4444', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
-                    onClick={() => {
-                      logout();
-                      setToastMsg("Logged out successfully");
-                      setLogoutConfirm(false);
-                    }}
-                  >Yes</button>
-                  <button 
-                    style={{ background: 'transparent', color: 'var(--bb-text)', border: '1px solid var(--bb-border)', padding: '3px 9px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
-                    onClick={() => setLogoutConfirm(false)}
-                  >No</button>
-                </div>
-              ) : (
-                <button 
-                  className="bb-icon-btn" 
-                  title="Logout" 
-                  onClick={() => setLogoutConfirm(true)}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                  </svg>
-                </button>
-              )}
-            </div>
-          ) : (
-            <button className="bb-icon-btn" title="Sign In" onClick={() => setAuthModalOpen(true)}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </button>
-          )}
-          <button className="bb-theme-btn" onClick={toggleTheme} aria-label="Toggle theme">
+          <button className="bb-theme-btn" onClick={toggleTheme} aria-label="Toggle theme" title="Toggle theme">
             {theme === 'dark' ? (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
@@ -409,8 +367,72 @@ export default function BibleBrowserApp() {
               </svg>
             )}
           </button>
+
+          {user ? (
+            <div className="bb-user-wrap">
+              <div
+                className="bb-user-pill"
+                title="Click to view profile"
+                onClick={() => setProfileModalOpen(true)}
+                role="button"
+                tabIndex={0}
+              >
+                <span className="bb-user-avatar">
+                  {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                </span>
+                <span className="bb-user-name">
+                  {user.displayName || user.email?.split('@')[0] || 'User'}
+                </span>
+              </div>
+              <button 
+                className="bb-icon-btn" 
+                title="Sign Out" 
+                onClick={() => setLogoutConfirm(true)}
+                aria-label="Sign Out"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <button className="bb-signin-btn" title="Sign In" onClick={() => setAuthModalOpen(true)}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Sign In</span>
+            </button>
+          )}
         </div>
       </header>
+
+      {/* ── Mobile Rows (Row 2: Search + Version, Row 3: Book + Chapter) ───── */}
+      {isMobile && (
+        <div className="bb-mobile-controls-wrap">
+          {/* Row 2: Search bar and Language/Version selector */}
+          <div className="bb-mobile-search-row">
+            <div className="bb-mobile-search-cell">
+              <SearchBar onSearch={handleSearch} placeholder="Search e.g. jer 33 3" />
+            </div>
+            <div className="bb-mobile-version-cell">
+              <VersionSelector versionId={versionId} onSelect={handleVersionSelect} isMobile={true} />
+            </div>
+          </div>
+
+          {/* Row 3: Bible books selector and chapter prev-next button */}
+          <NavBar
+            book={bookDisplay}
+            chapter={chapter}
+            onOpenBooks={() => setBookDrawer(true)}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            isMobile={true}
+          />
+        </div>
+      )}
 
       {/* ── Layout ─────────────────────────────────────────────────────────── */}
       <div className="bb-layout">
@@ -439,19 +461,6 @@ export default function BibleBrowserApp() {
 
         {/* ── Main Panel ──────────────────────────────────────────────────── */}
         <main className="bb-main">
-          {/* Mobile nav bar (book/chapter buttons + arrows) */}
-          <NavBar
-            book={bookDisplay}
-            chapter={chapter}
-            onOpenBooks={() => setBookDrawer(true)}
-            onPrev={handlePrev}
-            onNext={handleNext}
-            isMobile={isMobile}
-          >
-            {isMobile && (
-              <VersionSelector versionId={versionId} onSelect={handleVersionSelect} isMobile={isMobile} />
-            )}
-          </NavBar>
 
           {/* Desktop: chapter grid inline */}
           {!isMobile && (
@@ -534,6 +543,64 @@ export default function BibleBrowserApp() {
           onSuccess={() => setToastMsg('Successfully logged in!')} 
           onToast={setToastMsg}
         />
+      )}
+
+      {/* User Profile Modal ────────────────────────────────────────────── */}
+      {profileModalOpen && (
+        <UserProfileModal
+          user={user}
+          onClose={() => setProfileModalOpen(false)}
+          onLogout={() => {
+            logout();
+            setToastMsg('Logged out successfully');
+          }}
+          onToast={setToastMsg}
+        />
+      )}
+
+      {/* Sign Out Confirmation Modal (Center View) ───────────────────────── */}
+      {logoutConfirm && (
+        <div className="bb-modal-overlay" onClick={() => setLogoutConfirm(false)}>
+          <div
+            className="bb-modal bb-confirm-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Confirm Sign Out"
+          >
+            <div className="bb-modal-header">
+              <h2>Sign Out</h2>
+              <button className="bb-modal-close" onClick={() => setLogoutConfirm(false)} aria-label="Close">
+                ✕
+              </button>
+            </div>
+            <div className="bb-confirm-modal-body">
+              <p className="bb-confirm-modal-text">
+                Are you sure you want to sign out?
+              </p>
+              <div className="bb-confirm-modal-actions">
+                <button
+                  type="button"
+                  className="bb-confirm-modal-yes"
+                  onClick={() => {
+                    logout();
+                    setToastMsg('Logged out successfully');
+                    setLogoutConfirm(false);
+                  }}
+                >
+                  Yes, Sign Out
+                </button>
+                <button
+                  type="button"
+                  className="bb-confirm-modal-cancel"
+                  onClick={() => setLogoutConfirm(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
