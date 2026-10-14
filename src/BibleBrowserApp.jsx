@@ -441,7 +441,7 @@ export default function BibleBrowserApp() {
         <aside className="bb-sidebar">
           {/* Search */}
           <div className="bb-sidebar-search">
-            <SearchBar onSearch={handleSearch} placeholder="Psa 1 1" />
+            <SearchBar onSearch={handleSearch} placeholder="Search e.g. Psa 133 1" />
           </div>
 
           {/* Version selector */}
